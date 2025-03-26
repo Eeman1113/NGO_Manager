@@ -1,0 +1,3 @@
+event_id,title,description,date,time,location,coordinator,participants,status,created_by,created_date
+evt001,Annual Fundraiser,Annual fundraising event for the NGO,2025-05-15,18:00:00,"Community Hall, City Center",admin001,"vol001,vol002",upcoming,admin001,2025-03-15
+evt002,Community Workshop,Workshop on environmental awareness,2025-04-25,10:00:00,"Public Park, West Side",vol002,vol001,upcoming,admin001,2025-03-18

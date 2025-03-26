@@ -1,0 +1,3 @@
+record_id,event_id,user_id,status,check_in,check_out,tasks
+att001,evt001,vol001,confirmed,,,"registration,setup"
+att002,evt001,vol002,confirmed,,,social media coverage

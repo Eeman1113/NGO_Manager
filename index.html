@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGO Volunteer Management</title>
+    <link href="<https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap>" rel="stylesheet">
+    <link rel="stylesheet" href="<https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css>">
+    <script src="<https://cdn.jsdelivr.net/npm/chart.js>"></script>
+    <style>
+        /* General Styles */
+        :root {
+            --primary: #4e54c8;
+            --primary-light: #8f94fb;
+            --secondary: #ff8c6b;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --dark: #343a40;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --gray-dark: #495057;
+            --body-bg: #f4f7fa;
+            --text: #212529;
+            --border-radius: 10px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-light));
+            color: white;
+            position: fixed;
+            height: 100vh;
+            transition: var(--transition);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 15px;
+        }
+
+        .nav-item {
+            list-style: none;
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Auth Forms */
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-logo img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--gray-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-light);
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .auth-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .auth-link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ff7a55;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--gray-light);
+            background-color: var(--gray-light);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .stat-card.secondary {
+            background: linear-gradient(135deg, var(--secondary), #ffaa91);
+            color: white;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success), #5cd08d);
+            color: white;
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, var(--info), #4fcbe3);
+            color: white;
+        }
+
+        .stat-title {
+            font-size: 1rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: auto;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.2;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .table th {
+            background-color: var(--gray-light);
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary { background-color: var(--primary-light); color: white; }
+        .badge-secondary { background-color: var(--secondary); color: white; }
+        .badge-success { background-color: var(--success); color: white; }
+        .badge-danger { background-color: var(--danger); color: white; }
+        .badge-warning { background-color: var(--warning); color: white; }
+        .badge-info { background-color: var(--info); color: white; }
+
+        /* Task Cards */
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            position: relative;
+        }
+
+        .task-priority {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .priority-high { background-color: var(--danger); }
+        .priority-medium { background-color: var(--warning); }
+        .priority-low { background-color: var(--success); }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .task-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gray-light);
+            overflow-x: auto;
+        }
+
+        .tab-link {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--gray);
+            font-weight: 500;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-link.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Forms */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .form-control-file {
+            padding: 10px;
+            background-color: var(--gray-light);
+            border: 1px dashed var(--gray);
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .form-control-file input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            word-break: break-all;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Profile */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+            border: 5px solid white;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .profile-card {
+            margin-bottom: 30px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; }
+        .alert-warning { background-color: #fff3cd; color: #856404; }
+        .alert-info { background-color: #d1ecf1; color: #0c5460; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Aadhaar Verification Card */
+        .verification-card {
+            padding-bottom: 0;
+        }
+
+        .verification-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .verification-info {
+            flex: 1;
+        }
+
+        .verification-image {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--gray-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            height: 200px;
+        }
+
+        .verification-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Event Card */
+        .event-card-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .event-date {
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .event-date .month {
+            background-color: var(--primary);
+            color: white;
+            padding: 5px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .event-date .day {
+            background-color: white;
+            color: var(--primary);
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 1px solid var(--primary);
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .event-location {
+            color: var(--gray);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .event-location i {
+            margin-right: 5px;
+        }
+
+        .event-description {
+            margin-bottom: 10px;
+            color: var(--gray-dark);
+        }
+
+        /* Charts container */
+        .chart-container {
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        .dual-chart {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dual-chart {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Domain Badges */
+        .domain-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+
+            .sidebar:hover {
+                width: 250px;
+            }
+
+            .sidebar-header h3, .nav-link span, .sidebar-footer {
+                display: none;
+            }
+
+            .sidebar:hover .sidebar-header h3,
+            .sidebar:hover .nav-link span,
+            .sidebar:hover .sidebar-footer {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .stats-container, .tasks-container {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .verification-details {
+                flex-direction: column;
+            }
+        }
+
+        /* Utility Classes */
+        .text-primary { color: var(--primary); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+
+        .mt-2 { margin-top: 10px; }
+        .mt-3 { margin-top: 15px; }
+        .mb-2 { margin-bottom: 10px; }
+        .mb-3 { margin-bottom: 15px; }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-muted { color: var(--gray); }
+
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+
+        .w-100 { width: 100%; }
+        .position-relative { position: relative; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Logo">
+            <h3>NGO Management</h3>
+        </div>
+
+        <ul class="sidebar-nav" id="sidebarNav">
+            <!-- Dynamic Navigation - Will be populated by JS -->
+        </ul>
+
+        <div class="sidebar-footer">
+            <p>&copy; 2025 Divija Is The Cuddest</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Login Section -->
+        <section id="loginSection" class="section active">
+            <div class="auth-container">
+                <div class="auth-logo">
+                    <img src="logo.png" alt="Logo">
+                </div>
+                <h2 class="auth-title">Welcome Back</h2>
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                    <div class="auth-link">
+                        <span>Don't have an account? <a href="#" id="showRegister">Register Now</a></span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Register Section -->
+        <section id="registerSection" class="section">
+            <div class="auth-container">
+                <div class="auth-logo">
+                    <img src="logo.png" alt="Logo">
+                </div>
+                <h2 class="auth-title">Create Account</h2>
+                <form id="registerForm" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="registerName" class="form-label">Full Name</label>
+                                <input type="text" id="registerName" class="form-control" placeholder="Enter your name" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="registerEmail" class="form-label">Email Address</label>
+                                <input type="email" id="registerEmail" class="form-control" placeholder="Enter your email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="registerPassword" class="form-label">Password</label>
+                                <input type="password" id="registerPassword" class="form-control" placeholder="Create password" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="registerPhone" class="form-label">Phone Number</label>
+                                <input type="tel" id="registerPhone" class="form-control" placeholder="Enter phone number">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerAadhaar" class="form-label">Aadhaar Number</label>
+                        <input type="text" id="registerAadhaar" class="form-control" placeholder="Enter 12 digit Aadhaar number" maxlength="12">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerAadhaarFile" class="form-label">Upload Aadhaar Card</label>
+                        <div class="form-control-file" id="aadhaarUpload">
+                            <i class="fas fa-upload file-icon"></i>
+                            <span class="file-name">Click or drag file to upload</span>
+                            <input type="file" id="registerAadhaarFile" accept="image/*,.pdf">
+                        </div>
+                        <div class="form-hint">Upload a scanned copy or photo of your Aadhaar Card</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerDob" class="form-label">Date of Birth</label>
+                        <input type="date" id="registerDob" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Interest Areas</label>
+                        <div class="domain-badges">
+                            <label class="badge badge-primary" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="domains" value="marketing" style="margin-right: 5px;"> Marketing
+                            </label>
+                            <label class="badge badge-secondary" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="domains" value="social_media" style="margin-right: 5px;"> Social Media
+                            </label>
+                            <label class="badge badge-success" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="domains" value="on_ground" style="margin-right: 5px;"> On Ground
+                            </label>
+                            <label class="badge badge-info" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="domains" value="technical" style="margin-right: 5px;"> Technical
+                            </label>
+                            <label class="badge badge-warning" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="domains" value="design" style="margin-right: 5px;"> Design
+                            </label>
+                        </div>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </div>
+                    <div class="auth-link">
+                        <span>Already have an account? <a href="#" id="showLogin">Login Here</a></span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Dashboard</h1>
+                <div>
+                    <span id="currentDate" class="text-muted"></span>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card primary">
+                    <span class="stat-title">Total Events</span>
+                    <span class="stat-value">24</span>
+                    <span class="stat-desc">4 upcoming events</span>
+                    <i class="fas fa-calendar-alt stat-icon"></i>
+                </div>
+                <div class="stat-card secondary">
+                    <span class="stat-title">Active Members</span>
+                    <span class="stat-value">156</span>
+                    <span class="stat-desc">+12 this month</span>
+                    <i class="fas fa-users stat-icon"></i>
+                </div>
+                <div class="stat-card success">
+                    <span class="stat-title">Tasks Completed</span>
+                    <span class="stat-value">85%</span>
+                    <span class="stat-desc">178 out of 209 tasks</span>
+                    <i class="fas fa-tasks stat-icon"></i>
+                </div>
+                <div class="stat-card info">
+                    <span class="stat-title">Volunteer Hours</span>
+                    <span class="stat-value">843</span>
+                    <span class="stat-desc">+128 this month</span>
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Annual Progress</h3>
+                </div>
+                <div class="card-body">
+                    <div class="dual-chart">
+                        <div class="chart-container">
+                            <canvas id="eventsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="volunteersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Upcoming Events</h3>
+                    <button class="btn btn-primary btn-sm" id="viewAllEvents">View All</button>
+                </div>
+                <div class="card-body">
+                    <div class="events-list">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="event-card-content">
+                                    <div class="event-date">
+                                        <div class="month">Dec</div>
+                                        <div class="day">15</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">Annual Charity Run</h4>
+                                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Central Park Stadium</p>
+                                        <p class="event-description">Join us for our annual charity run to raise funds for children's education. Volunteers needed for logistics, registration, and support.</p>
+                                        <div class="domain-badges">
+                                            <span class="badge badge-primary">On Ground</span>
+                                            <span class="badge badge-secondary">Marketing</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <div><strong>Volunteers:</strong> 24/40</div>
+                                <button class="btn btn-primary btn-sm">Sign Up</button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="event-card-content">
+                                    <div class="event-date">
+                                        <div class="month">Dec</div>
+                                        <div class="day">22</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">Food Distribution Drive</h4>
+                                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Community Center</p>
+                                        <p class="event-description">Holiday season food distribution drive for underprivileged families. Help us package and distribute meals.</p>
+                                        <div class="domain-badges">
+                                            <span class="badge badge-primary">On Ground</span>
+                                            <span class="badge badge-success">Social Work</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <div><strong>Volunteers:</strong> 18/30</div>
+                                <button class="btn btn-primary btn-sm">Sign Up</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications & Birthdays -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Notifications & Birthdays</h3>
+                </div>
+                <div class="card-body">
+                    <div class="tab-nav">
+                        <div class="tab-link active" data-tab="notificationsTab">Notifications</div>
+                        <div class="tab-link" data-tab="birthdaysTab">Today's Birthdays</div>
+                    </div>
+
+                    <div id="notificationsTab" class="tab-content active">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Task "Social Media Post Creation" has been assigned to you.
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Your Aadhaar card has been verified successfully!
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i> Event "Beach Cleanup Drive" has been rescheduled to Dec 30.
+                        </div>
+                    </div>
+
+                    <div id="birthdaysTab" class="tab-content">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="<https://placehold.co/60x60?text=P>" alt="Profile" style="border-radius: 50%; margin-right: 15px;">
+                            <div>
+                                <h4>Priya Sharma</h4>
+                                <p class="text-muted">Social Media Team</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary" style="margin-left: auto;">Send Wishes</button>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <img src="<https://placehold.co/60x60?text=R>" alt="Profile" style="border-radius: 50%; margin-right: 15px;">
+                            <div>
+                                <h4>Rahul Desai</h4>
+                                <p class="text-muted">Tech Team</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary" style="margin-left: auto;">Send Wishes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks Section -->
+        <section id="tasksSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Tasks Management</h1>
+                <button class="btn btn-primary" id="createTaskBtn"><i class="fas fa-plus"></i> Create Task</button>
+            </div>
+
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="allTasksTab">All Tasks</div>
+                <div class="tab-link" data-tab="pendingTasksTab">Pending</div>
+                <div class="tab-link" data-tab="completedTasksTab">Completed</div>
+                <div class="tab-link" data-tab="myTasksTab">My Tasks</div>
+            </div>
+
+            <div id="allTasksTab" class="tab-content active">
+                <div class="tasks-container">
+                    <!-- Task Card 1 -->
+                    <div class="card task-card">
+                        <div class="task-priority priority-high"></div>
+                        <div class="card-body">
+                            <h4 class="card-title">Create Social Media Campaign</h4>
+                            <p>Design and schedule posts for upcoming charity gala on all social platforms.</p>
+                            <div class="task-meta">
+                                <span><i class="fas fa-calendar"></i> Due: Dec 10, 2025</span>
+                                <span><i class="fas fa-user"></i> Assigned to: Aisha</span>
+                            </div>
+                            <div class="domain-badges">
+                                <span class="badge badge-primary">Marketing</span>
+                                <span class="badge badge-secondary">Social Media</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="task-actions">
+                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Complete</button>
+                                <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task Card 2 -->
+                    <div class="card task-card">
+                        <div class="task-priority priority-medium"></div>
+                        <div class="card-body">
+                            <h4 class="card-title">Update Volunteer Database</h4>
+                            <p>Review and update contact information for all active volunteers.</p>
+                            <div class="task-meta">
+                                <span><i class="fas fa-calendar"></i> Due: Dec 15, 2025</span>
+                                <span><i class="fas fa-user"></i> Assigned to: Rahul</span>
+                            </div>
+                            <div class="domain-badges">
+                                <span class="badge badge-info">Technical</span>
+                                <span class="badge badge-success">Admin</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="task-actions">
+                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Complete</button>
+                                <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task Card 3 -->
+                    <div class="card task-card">
+                        <div class="task-priority priority-low"></div>
+                        <div class="card-body">
+                            <h4 class="card-title">Venue Research for Annual Event</h4>
+                            <p>Research and compare potential venues for the annual charity gala.</p>
+                            <div class="task-meta">
+                                <span><i class="fas fa-calendar"></i> Due: Dec 20, 2025</span>
+                                <span><i class="fas fa-user"></i> Assigned to: Priya</span>
+                            </div>
+                            <div class="domain-badges">
+                                <span class="badge badge-warning">Event Planning</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="task-actions">
+                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Complete</button>
+                                <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pendingTasksTab" class="tab-content">
+                <!-- Will be populated with pending tasks -->
+                <div class="alert alert-info text-center">
+                    Pending tasks will appear here.
+                </div>
+            </div>
+
+            <div id="completedTasksTab" class="tab-content">
+                <!-- Will be populated with completed tasks -->
+                <div class="alert alert-success text-center">
+                    Completed tasks will appear here.
+                </div>
+            </div>
+
+            <div id="myTasksTab" class="tab-content">
+                <!-- Will be populated with user's tasks -->
+                <div class="alert alert-info text-center">
+                    Your assigned tasks will appear here.
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="eventsSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Events Management</h1>
+                <button class="btn btn-primary" id="createEventBtn"><i class="fas fa-plus"></i> Create Event</button>
+            </div>
+
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="upcomingEventsTab">Upcoming</div>
+                <div class="tab-link" data-tab="pastEventsTab">Past Events</div>
+                <div class="tab-link" data-tab="myEventsTab">My Events</div>
+            </div>
+
+            <div id="upcomingEventsTab" class="tab-content active">
+                <!-- Event Card 1 -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="event-card-content">
+                            <div class="event-date">
+                                <div class="month">Dec</div>
+                                <div class="day">15</div>
+                            </div>
+                            <div class="event-details">
+                                <h4 class="event-title">Annual Charity Run</h4>
+                                <p class="event-location"><i class="fas fa-map-marker-alt"></i> Central Park Stadium</p>
+                                <p class="event-description">Join us for our annual charity run to raise funds for children's education. Volunteers needed for logistics, registration, and support.</p>
+                                <div class="domain-badges">
+                                    <span class="badge badge-primary">On Ground</span>
+                                    <span class="badge badge-secondary">Marketing</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <div><strong>Volunteers:</strong> 24/40</div>
+                        <div>
+                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Details</button>
+                            <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Card 2 -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="event-card-content">
+                            <div class="event-date">
+                                <div class="month">Dec</div>
+                                <div class="day">22</div>
+                            </div>
+                            <div class="event-details">
+                                <h4 class="event-title">Food Distribution Drive</h4>
+                                <p class="event-location"><i class="fas fa-map-marker-alt"></i> Community Center</p>
+                                <p class="event-description">Holiday season food distribution drive for underprivileged families. Help us package and distribute meals.</p>
+                                <div class="domain-badges">
+                                    <span class="badge badge-primary">On Ground</span>
+                                    <span class="badge badge-success">Social Work</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <div><strong>Volunteers:</strong> 18/30</div>
+                        <div>
+                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Details</button>
+                            <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Card 3 -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="event-card-content">
+                            <div class="event-date">
+                                <div class="month">Dec</div>
+                                <div class="day">30</div>
+                            </div>
+                            <div class="event-details">
+                                <h4 class="event-title">Beach Cleanup Drive</h4>
+                                <p class="event-location"><i class="fas fa-map-marker-alt"></i> Juhu Beach</p>
+                                <p class="event-description">Join our efforts to clean up the beach and raise awareness about plastic pollution. All equipment will be provided.</p>
+                                <div class="domain-badges">
+                                    <span class="badge badge-primary">On Ground</span>
+                                    <span class="badge badge-warning">Environment</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <div><strong>Volunteers:</strong> 32/50</div>
+                        <div>
+                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Details</button>
+                            <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pastEventsTab" class="tab-content">
+                <!-- Will be populated with past events -->
+                <div class="alert alert-info text-center">
+                    Past events will appear here.
+                </div>
+            </div>
+
+            <div id="myEventsTab" class="tab-content">
+                <!-- Will be populated with user's events -->
+                <div class="alert alert-info text-center">
+                    Events you've signed up for will appear here.
+                </div>
+            </div>
+        </section>
+
+        <!-- Members Section -->
+        <section id="membersSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Members & Volunteers</h1>
+                <div>
+                    <input type="text" class="form-control" placeholder="Search members..." id="memberSearch" style="width: 250px;">
+                </div>
+            </div>
+
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="allMembersTab">All Members</div>
+                <div class="tab-link" data-tab="activeMembersTab">Active</div>
+                <div class="tab-link" data-tab="inactiveMembersTab">Inactive</div>
+                <div class="tab-link" data-tab="pendingVerificationTab">Pending Verification</div>
+            </div>
+
+            <div id="allMembersTab" class="tab-content active">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Domains</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Priya Sharma</td>
+                                <td>priya@example.com</td>
+                                <td>Volunteer</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-primary">Marketing</span>
+                                        <span class="badge badge-secondary">Social Media</span>
+                                    </div>
+                                </td>
+                                <td>Mar 12, 2025</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rahul Desai</td>
+                                <td>rahul@example.com</td>
+                                <td>Member</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-info">Technical</span>
+                                    </div>
+                                </td>
+                                <td>Jun 5, 2025</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Aisha Khan</td>
+                                <td>aisha@example.com</td>
+                                <td>Admin</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-primary">Marketing</span>
+                                        <span class="badge badge-warning">Event Planning</span>
+                                    </div>
+                                </td>
+                                <td>Jan 20, 2022</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Vikram Patel</td>
+                                <td>vikram@example.com</td>
+                                <td>Volunteer</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-success">On Ground</span>
+                                    </div>
+                                </td>
+                                <td>Aug 17, 2025</td>
+                                <td><span class="badge badge-danger">Inactive</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="activeMembersTab" class="tab-content">
+                <!-- Will be populated with active members -->
+            </div>
+
+            <div id="inactiveMembersTab" class="tab-content">
+                <!-- Will be populated with inactive members -->
+            </div>
+
+            <div id="pendingVerificationTab" class="tab-content">
+                <div class="card verification-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Aadhaar Verification</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Verification Card 1 -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="verification-details">
+                                    <div class="verification-info">
+                                        <h4>Sandeep Kumar</h4>
+                                        <p><strong>Email:</strong> sandeep@example.com</p>
+                                        <p><strong>Phone:</strong> +91 98765 43210</p>
+                                        <p><strong>Aadhaar Number:</strong> xxxx xxxx 5678</p>
+                                        <p><strong>Registration Date:</strong> Dec 1, 2025</p>
+                                    </div>
+                                    <div class="verification-image">
+                                        <img src="<https://placehold.co/400x250?text=Aadhaar+Card>" alt="Aadhaar Card">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                                    <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verification Card 2 -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="verification-details">
+                                    <div class="verification-info">
+                                        <h4>Meera Joshi</h4>
+                                        <p><strong>Email:</strong> meera@example.com</p>
+                                        <p><strong>Phone:</strong> +91 98765 12345</p>
+                                        <p><strong>Aadhaar Number:</strong> xxxx xxxx 1234</p>
+                                        <p><strong>Registration Date:</strong> Dec 3, 2025</p>
+                                    </div>
+                                    <div class="verification-image">
+                                        <img src="<https://placehold.co/400x250?text=Aadhaar+Card>" alt="Aadhaar Card">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                                    <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">My Profile</h1>
+                <button class="btn btn-primary" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
+            </div>
+
+            <div class="profile-header">
+                <img src="<https://placehold.co/100x100?text=P>" alt="Profile" class="profile-avatar">
+                <div class="profile-info">
+                    <h2>Priya Sharma</h2>
+                    <p>Volunteer | Marketing, Social Media</p>
+                    <p class="text-muted">Member since March 12, 2025</p>
+                </div>
+            </div>
+
+            <div class="card profile-card">
+                <div class="card-header">
+                    <h3 class="card-title">Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <p>Priya Sharma</p>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <p>priya@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Date of Birth</label>
+                                <p>April 15, 1992</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Aadhaar Verification Status</label>
+                        <p><span class="badge badge-success">Verified</span></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Domain Interest Areas</label>
+                        <div class="domain-badges">
+                            <span class="badge badge-primary">Marketing</span>
+                            <span class="badge badge-secondary">Social Media</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card profile-card">
+                <div class="card-header">
+                    <h3 class="card-title">Activity Summary</h3>
+                </div>
+                <div class="card-body">
+                    <div class="stats-container">
+                        <div class="stat-card primary">
+                            <span class="stat-title">Events Participated</span>
+                            <span class="stat-value">12</span>
+                            <span class="stat-desc">Last event: Dec 1, 2025</span>
+                        </div>
+                        <div class="stat-card secondary">
+                            <span class="stat-title">Tasks Completed</span>
+                            <span class="stat-value">28</span>
+                            <span class="stat-desc">Completion rate: 94%</span>
+                        </div>
+                        <div class="stat-card success">
+                            <span class="stat-title">Volunteer Hours</span>
+                            <span class="stat-value">86</span>
+                            <span class="stat-desc">Last 6 months</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mt-3">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card profile-card">
+                <div class="card-header">
+                    <h3 class="card-title">My Certificates</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Certificate Name</th>
+                                    <th>Issued For</th>
+                                    <th>Issue Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Volunteer Recognition</td>
+                                    <td>Outstanding contributions in Social Media Management</td>
+                                    <td>Nov 15, 2025</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info"><i class="fas fa-download"></i> Download</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Event Participation</td>
+                                    <td>Beach Cleanup Drive</td>
+                                    <td>Oct 30, 2025</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info"><i class="fas fa-download"></i> Download</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ideation Section -->
+        <section id="ideationSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Ideas & Problem Reporting</h1>
+                <button class="btn btn-primary" id="submitIdeaBtn"><i class="fas fa-lightbulb"></i> Submit New Idea</button>
+            </div>
+
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="ideasTab">Ideas</div>
+                <div class="tab-link" data-tab="problemsTab">Problems</div>
+                <div class="tab-link" data-tab="mySubmissionsTab">My Submissions</div>
+            </div>
+
+            <div id="ideasTab" class="tab-content active">
+                <!-- Idea Card 1 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Virtual Fundraising Event</h3>
+                        <span class="badge badge-primary">Event Idea</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Submitted by:</strong> Rahul Desai</p>
+                        <p><strong>Date:</strong> Nov 28, 2025</p>
+                        <p class="mt-2">We should organize a virtual fundraising event where artists and performers can showcase their talents online. Viewers can donate in real-time and we can have a leaderboard of top donors. This would allow us to reach a global audience without geographical limitations.</p>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-secondary"><i class="fas fa-thumbs-up"></i> Upvote (12)</button>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-comment"></i> Comment (5)</button>
+                            </div>
+                            <div>
+                                <span class="badge badge-info">Under Review</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Idea Card 2 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Skills Workshop</h3>
+                        <span class="badge badge-primary">Event Idea</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Submitted by:</strong> Aisha Khan</p>
+                        <p><strong>Date:</strong> Nov 20, 2025</p>
+                        <p class="mt-2">We should conduct monthly workshops where our skilled volunteers can teach various skills to underprivileged children. Skills can include basic computer usage, art, language, etc. This would be a sustainable model for continuous engagement.</p>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-secondary"><i class="fas fa-thumbs-up"></i> Upvote (23)</button>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-comment"></i> Comment (8)</button>
+                            </div>
+                            <div>
+                                <span class="badge badge-success">Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="problemsTab" class="tab-content">
+                <!-- Problem Card 1 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Transportation Issues for On-Ground Events</h3>
+                        <span class="badge badge-danger">Logistical Problem</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Submitted by:</strong> Priya Sharma</p>
+                        <p><strong>Date:</strong> Dec 2, 2025</p>
+                        <p class="mt-2">Many volunteers face difficulties with transportation to remote event locations. We should consider organizing carpooling or arranging transportation for volunteers to ensure better participation in on-ground events.</p>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-comment"></i> Comment (3)</button>
+                            </div>
+                            <div>
+                                <span class="badge badge-warning">Under Investigation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mySubmissionsTab" class="tab-content">
+                <!-- Will be populated with user's submissions -->
+                <div class="alert alert-info text-center">
+                    Your submitted ideas and problems will appear here.
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settingsSection" class="section">
+            <div class="section-header">
+                <h1 class="section-title">Settings</h1>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">Account Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="settingsEmail" class="form-label">Email Address</label>
+                                    <input type="email" id="settingsEmail" class="form-control" value="priya@example.com">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="settingsPhone" class="form-label">Phone Number</label>
+                                    <input type="tel" id="settingsPhone" class="form-control" value="+91 98765 43210">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password to make changes">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">Notification Preferences</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Email Notifications</label>
+                        <div class="mt-2">
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="emailTaskNotifications" class="form-check-input" checked>
+                                <label for="emailTaskNotifications" class="form-check-label">Task assignments and updates</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="emailEventNotifications" class="form-check-input" checked>
+                                <label for="emailEventNotifications" class="form-check-label">Event announcements and changes</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="emailNewsletters" class="form-check-input" checked>
+                                <label for="emailNewsletters" class="form-check-label">Monthly newsletters</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">SMS Notifications</label>
+                        <div class="mt-2">
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="smsTaskReminders" class="form-check-input">
+                                <label for="smsTaskReminders" class="form-check-label">Task deadline reminders</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="smsEventReminders" class="form-check-input" checked>
+                                <label for="smsEventReminders" class="form-check-label">Event day reminders</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary">Save Preferences</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Create Task Modal -->
+    <div class="modal-overlay" id="createTaskModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Task</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm">
+                    <div class="form-group">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <input type="text" id="taskTitle" class="form-control" placeholder="Enter task title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <textarea id="taskDescription" class="form-control" placeholder="Enter task description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="taskDomain" class="form-label">Domain</label>
+                                <select id="taskDomain" class="form-control" required>
+                                    <option value="">Select domain</option>
+                                    <option value="marketing">Marketing</option>
+                                    <option value="social_media">Social Media</option>
+                                    <option value="technical">Technical</option>
+                                    <option value="on_ground">On Ground</option>
+                                    <option value="event_planning">Event Planning</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="taskPriority" class="form-label">Priority</label>
+                                <select id="taskPriority" class="form-control" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="taskStartDate" class="form-label">Start Date</label>
+                                <input type="date" id="taskStartDate" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="taskDueDate" class="form-label">Due Date</label>
+                                <input type="date" id="taskDueDate" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskAssignee" class="form-label">Assignee</label>
+                        <select id="taskAssignee" class="form-control">
+                            <option value="auto">Auto-assign (Smart Matching)</option>
+                            <option value="1">Priya Sharma</option>
+                            <option value="2">Rahul Desai</option>
+                            <option value="3">Aisha Khan</option>
+                        </select>
+                        <div class="form-hint">Leave as "Auto-assign" to use Smart Matching System</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light modal-close">Cancel</button>
+                <button class="btn btn-primary" id="saveTaskBtn">Create Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div class="modal-overlay" id="createEventModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Event</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="createEventForm">
+                    <div class="form-group">
+                        <label for="eventTitle" class="form-label">Event Title</label>
+                        <input type="text" id="eventTitle" class="form-control" placeholder="Enter event title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDescription" class="form-label">Description</label>
+                        <textarea id="eventDescription" class="form-control" placeholder="Enter event description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="eventDate" class="form-label">Event Date</label>
+                                <input type="date" id="eventDate" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="eventTime" class="form-label">Event Time</label>
+                                <input type="time" id="eventTime" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventLocation" class="form-label">Location</label>
+                        <input type="text" id="eventLocation" class="form-control" placeholder="Enter event location" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="eventType" class="form-label">Event Type</label>
+                                <select id="eventType" class="form-control" required>
+                                    <option value="">Select type</option>
+                                    <option value="fundraising">Fundraising</option>
+                                    <option value="community_service">Community Service</option>
+                                    <option value="workshop">Workshop</option>
+                                    <option value="awareness">Awareness Campaign</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="volunteerCapacity" class="form-label">Volunteer Capacity</label>
+                                <input type="number" id="volunteerCapacity" class="form-control" min="1" value="10" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Required Domains</label>
+                        <div class="domain-badges">
+                            <label class="badge badge-primary" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="eventDomains" value="marketing" style="margin-right: 5px;"> Marketing
+                            </label>
+                            <label class="badge badge-secondary" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="eventDomains" value="social_media" style="margin-right: 5px;"> Social Media
+                            </label>
+                            <label class="badge badge-success" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="eventDomains" value="on_ground" style="margin-right: 5px;"> On Ground
+                            </label>
+                            <label class="badge badge-info" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="eventDomains" value="technical" style="margin-right: 5px;"> Technical
+                            </label>
+                            <label class="badge badge-warning" style="margin-right: 5px; cursor: pointer;">
+                                <input type="checkbox" name="eventDomains" value="event_planning" style="margin-right: 5px;"> Event Planning
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light modal-close">Cancel</button>
+                <button class="btn btn-primary" id="saveEventBtn">Create Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Idea Modal -->
+    <div class="modal-overlay" id="submitIdeaModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Submit New Idea</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="submitIdeaForm">
+                    <div class="form-group">
+                        <label for="ideaTitle" class="form-label">Title</label>
+                        <input type="text" id="ideaTitle" class="form-control" placeholder="Enter a title for your idea" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaType" class="form-label">Type</label>
+                        <select id="ideaType" class="form-control" required>
+                            <option value="event">Event Idea</option>
+                            <option value="process">Process Improvement</option>
+                            <option value="fundraising">Fundraising Idea</option>
+                            <option value="problem">Problem Report</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaDescription" class="form-label">Description</label>
+                        <textarea id="ideaDescription" class="form-control" placeholder="Describe your idea in detail" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light modal-close">Cancel</button>
+                <button class="btn btn-primary" id="saveIdeaBtn">Submit Idea</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // User authentication and state management
+        let currentUser = null;
+        let userRole = null;
+
+        // Initialize data storage if it doesn't exist
+        if (!localStorage.getItem('users')) {
+            const initialUsers = [
+                {
+                    id: 1,
+                    name: 'Admin User',
+                    email: 'admin@example.com',
+                    password: 'admin123',
+                    role: 'admin',
+                    aadhaarVerified: true,
+                    domains: ['marketing', 'social_media', 'technical'],
+                    active: true,
+                    joinDate: '2025-01-01'
+                },
+                {
+                    id: 2,
+                    name: 'Priya Sharma',
+                    email: 'priya@example.com',
+                    password: 'password123',
+                    role: 'volunteer',
+                    aadhaarVerified: true,
+                    domains: ['marketing', 'social_media'],
+                    active: true,
+                    joinDate: '2025-03-12'
+                }
+            ];
+            localStorage.setItem('users', JSON.stringify(initialUsers));
+        }
+
+        // DOM Elements
+        const sections = document.querySelectorAll('.section');
+        const sidebarNav = document.getElementById('sidebarNav');
+
+        // Function to show a specific section
+        function showSection(sectionId) {
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update active state in navigation
+            const navItems = document.querySelectorAll('.nav-link');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if(item.getAttribute('data-section') === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Function to update navigation based on user role
+        function updateNavigation() {
+            let navItems = '';
+
+            if (!currentUser) {
+                // Show auth-only navigation
+                navItems = `
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="loginSection">
+                            <i class="fas fa-sign-in-alt"></i><span>Login</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="registerSection">
+                            <i class="fas fa-user-plus"></i><span>Register</span>
+                        </a>
+                    </li>
+                `;
+            } else {
+                // Common navigation items for all authenticated users
+                navItems = `
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboardSection">
+                            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="profileSection">
+                            <i class="fas fa-user"></i><span>My Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="tasksSection">
+                            <i class="fas fa-tasks"></i><span>Tasks</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="eventsSection">
+                            <i class="fas fa-calendar-alt"></i><span>Events</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="ideationSection">
+                            <i class="fas fa-lightbulb"></i><span>Ideas</span>
+                        </a>
+                    </li>
+                `;
+
+                // Admin-specific navigation items
+                if (userRole === 'admin') {
+                    navItems += `
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-section="membersSection">
+                                <i class="fas fa-users"></i><span>Members</span>
+                            </a>
+                        </li>
+                    `;
+                }
+
+                // Settings and logout for all authenticated users
+                navItems += `
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="settingsSection">
+                            <i class="fas fa-cog"></i><span>Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" id="logoutLink">
+                            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                        </a>
+                    </li>
+                `;
+            }
+
+            sidebarNav.innerHTML = navItems;
+
+            // Add event listeners to navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.id === 'logoutLink') {
+                    link.addEventListener('click', handleLogout);
+                } else {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const sectionId = this.getAttribute('data-section');
+                        showSection(sectionId);
+                    });
+                }
+            });
+        }
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                userRole = user.role;
+                updateNavigation();
+                showSection('dashboardSection');
+                initializeDashboard();
+                showNotification('Login successful!', 'success');
+            } else {
+                showNotification('Invalid email or password', 'danger');
+            }
+        });
+
+        // Registration functionality
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const phone = document.getElementById('registerPhone').value;
+            const aadhaar = document.getElementById('registerAadhaar').value;
+            const dob = document.getElementById('registerDob').value;
+
+            // Get selected domains
+            const selectedDomains = [];
+            document.querySelectorAll('input[name="domains"]:checked').forEach(checkbox => {
+                selectedDomains.push(checkbox.value);
+            });
+
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Check if email already exists
+            if (users.some(u => u.email === email)) {
+                showNotification('Email already registered', 'danger');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: users.length + 1,
+                name,
+                email,
+                password,
+                phone,
+                aadhaar,
+                dateOfBirth: dob,
+                role: 'volunteer',
+                aadhaarVerified: false,
+                domains: selectedDomains,
+                active: true,
+                joinDate: new Date().toISOString().split('T')[0]
+            };
+
+            // Add to users array and save to localStorage
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            showNotification('Registration successful! Please login.', 'success');
+            showSection('loginSection');
+        });
+
+        // Logout handler
+        function handleLogout(e) {
+            e.preventDefault();
+            currentUser = null;
+            userRole = null;
+            updateNavigation();
+            showSection('loginSection');
+            showNotification('You have been logged out', 'info');
+        }
+
+        // Auth page navigation
+        document.getElementById('showRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('registerSection');
+        });
+
+        document.getElementById('showLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('loginSection');
+        });
+
+        // File upload preview for Aadhaar
+        document.getElementById('registerAadhaarFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Click or drag file to upload';
+            document.querySelector('#aadhaarUpload .file-name').textContent = fileName;
+        });
+
+        // Tab navigation
+        document.querySelectorAll('.tab-link').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabContentId = this.getAttribute('data-tab');
+                const tabSection = this.closest('.section');
+
+                // Update active tab
+                tabSection.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show corresponding tab content
+                tabSection.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                tabSection.querySelector(`#${tabContentId}`).classList.add('active');
+            });
+        });
+
+        // Modal functionality
+        const modals = document.querySelectorAll('.modal-overlay');
+
+        // Modal open buttons
+        document.getElementById('createTaskBtn').addEventListener('click', () => {
+            document.getElementById('createTaskModal').classList.add('active');
+        });
+
+        document.getElementById('createEventBtn').addEventListener('click', () => {
+            document.getElementById('createEventModal').classList.add('active');
+        });
+
+        document.getElementById('submitIdeaBtn').addEventListener('click', () => {
+            document.getElementById('submitIdeaModal').classList.add('active');
+        });
+
+        // Modal close buttons
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal-overlay').classList.remove('active');
+            });
+        });
+
+        // Close modal when clicking outside
+        modals.forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize dashboard charts
+        function initializeDashboard() {
+            // Set current date
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+
+            // Events Chart
+            const eventsCtx = document.getElementById('eventsChart').getContext('2d');
+            const eventsChart = new Chart(eventsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Events Completed',
+                        data: [2, 3, 1, 2, 3, 2, 1, 3, 2, 2, 2, 1],
+                        backgroundColor: '#4e54c8',
+                        borderColor: '#4e54c8',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Events Completed This Year'
+                        }
+                    }
+                }
+            });
+
+            // Volunteers Chart
+            const volunteersCtx = document.getElementById('volunteersChart').getContext('2d');
+            const volunteersChart = new Chart(volunteersCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Active Volunteers',
+                        data: [120, 125, 130, 140, 145, 148, 150, 153, 155, 158, 160, 156],
+                        backgroundColor: 'rgba(255, 140, 107, 0.2)',
+                        borderColor: '#ff8c6b',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Volunteer Growth This Year'
+                        }
+                    }
+                }
+            });
+
+            // Activity Chart (Profile)
+            if (document.getElementById('activityChart')) {
+                const activityCtx = document.getElementById('activityChart').getContext('2d');
+                const activityChart = new Chart(activityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Events Participated',
+                            data: [2, 1, 3, 2, 2, 2],
+                            borderColor: '#4e54c8',
+                            backgroundColor: 'rgba(78, 84, 200, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Tasks Completed',
+                            data: [5, 4, 6, 5, 4, 4],
+                            borderColor: '#ff8c6b',
+                            backgroundColor: 'rgba(255, 140, 107, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Your Activity (Last 6 Months)'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '10000';
+            notification.style.maxWidth = '300px';
+            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            notification.style.transition = 'all 0.3s ease';
+            notification.style.transform = 'translateX(100%)';
+            notification.style.opacity = '0';
+
+            // Add icon based on type
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'danger') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+
+            notification.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+
+            document.body.appendChild(notification);
+
+            // Show the notification
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 10);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Smart Matching System for Task Assignment
+        function findBestVolunteerForTask(taskDomain, taskPriority) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+            // Filter active volunteers who have the required domain
+            const eligibleVolunteers = users.filter(user =>
+                user.role === 'volunteer' &&
+                user.active === true &&
+                user.domains.includes(taskDomain)
+            );
+
+            if (eligibleVolunteers.length === 0) return null;
+
+            // Calculate workload for each volunteer
+            const volunteerWorkload = {};
+            eligibleVolunteers.forEach(volunteer => {
+                const activeTasksCount = tasks.filter(task =>
+                    task.assigneeId === volunteer.id &&
+                    ['pending', 'in_progress'].includes(task.status)
+                ).length;
+
+                volunteerWorkload[volunteer.id] = activeTasksCount;
+            });
+
+            // Find volunteer with minimum workload
+            let minWorkload = Infinity;
+            let bestVolunteer = null;
+
+            Object.keys(volunteerWorkload).forEach(volunteerId => {
+                if (volunteerWorkload[volunteerId] < minWorkload) {
+                    minWorkload = volunteerWorkload[volunteerId];
+                    bestVolunteer = users.find(user => user.id == volunteerId);
+                }
+            });
+
+            return bestVolunteer;
+        }
+
+        // Save task
+        document.getElementById('saveTaskBtn').addEventListener('click', function() {
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const domain = document.getElementById('taskDomain').value;
+            const priority = document.getElementById('taskPriority').value;
+            const startDate = document.getElementById('taskStartDate').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const assigneeChoice = document.getElementById('taskAssignee').value;
+
+            if (!title || !description || !domain || !startDate || !dueDate) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+
+            let assigneeId = null;
+
+            if (assigneeChoice === 'auto') {
+                // Use Smart Matching System
+                const bestVolunteer = findBestVolunteerForTask(domain, priority);
+                if (bestVolunteer) {
+                    assigneeId = bestVolunteer.id;
+                }
+            } else {
+                assigneeId = parseInt(assigneeChoice);
+            }
+
+            // Get tasks from localStorage
+            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+            // Create new task
+            const newTask = {
+                id: tasks.length + 1,
+                title,
+                description,
+                domain,
+                priority,
+                startDate,
+                dueDate,
+                creatorId: currentUser.id,
+                assigneeId,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            // Add to tasks array and save to localStorage
+            tasks.push(newTask);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            showNotification('Task created successfully', 'success');
+            document.getElementById('createTaskModal').classList.remove('active');
+
+            // Reset form
+            document.getElementById('createTaskForm').reset();
+        });
+
+        // Save event
+        document.getElementById('saveEventBtn').addEventListener('click', function() {
+            const title = document.getElementById('eventTitle').value;
+            const description = document.getElementById('eventDescription').value;
+            const eventDate = document.getElementById('eventDate').value;
+            const eventTime = document.getElementById('eventTime').value;
+            const location = document.getElementById('eventLocation').value;
+            const eventType = document.getElementById('eventType').value;
+            const capacity = document.getElementById('volunteerCapacity').value;
+
+            // Get selected domains
+            const selectedDomains = [];
+            document.querySelectorAll('input[name="eventDomains"]:checked').forEach(checkbox => {
+                selectedDomains.push(checkbox.value);
+            });
+
+            if (!title || !description || !eventDate || !eventTime || !location || !eventType) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+
+            // Get events from localStorage
+            const events = JSON.parse(localStorage.getItem('events') || '[]');
+
+            // Create new event
+            const newEvent = {
+                id: events.length + 1,
+                title,
+                description,
+                date: eventDate,
+                time: eventTime,
+                location,
+                type: eventType,
+                capacity: parseInt(capacity),
+                domains: selectedDomains,
+                creatorId: currentUser.id,
+                participants: [],
+                status: 'upcoming',
+                createdAt: new Date().toISOString()
+            };
+
+            // Add to events array and save to localStorage
+            events.push(newEvent);
+            localStorage.setItem('events', JSON.stringify(events));
+
+            showNotification('Event created successfully', 'success');
+            document.getElementById('createEventModal').classList.remove('active');
+
+            // Reset form
+            document.getElementById('createEventForm').reset();
+        });
+
+        // Save idea/problem
+        document.getElementById('saveIdeaBtn').addEventListener('click', function() {
+            const title = document.getElementById('ideaTitle').value;
+            const type = document.getElementById('ideaType').value;
+            const description = document.getElementById('ideaDescription').value;
+
+            if (!title || !description) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+
+            // Get ideas from localStorage
+            const ideas = JSON.parse(localStorage.getItem('ideas') || '[]');
+
+            // Create new idea
+            const newIdea = {
+                id: ideas.length + 1,
+                title,
+                type,
+                description,
+                submitterId: currentUser.id,
+                submitterName: currentUser.name,
+                status: 'pending',
+                upvotes: 0,
+                comments: [],
+                createdAt: new Date().toISOString()
+            };
+
+            // Add to ideas array and save to localStorage
+            ideas.push(newIdea);
+            localStorage.setItem('ideas', JSON.stringify(ideas));
+
+            showNotification('Idea submitted successfully', 'success');
+            document.getElementById('submitIdeaModal').classList.remove('active');
+
+            // Reset form
+            document.getElementById('submitIdeaForm').reset();
+        });
+
+        // Initialize the application
+        function initializeApp() {
+            updateNavigation();
+        }
+
+        // Start the application
+        initializeApp();
+    </script>
+</body>
+</html>

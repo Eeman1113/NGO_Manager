@@ -1,0 +1,4 @@
+user_id,username,password,role,name,email,phone,skills,domains,availability,aadhar_verified,aadhar_image,status,join_date,birthday
+admin001,admin,240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9,admin,Admin User,admin@ngo.org,9876543210,management,management,weekdays,True,,active,2023-01-01,1990-05-15
+vol001,john_doe,ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f,volunteer,John Doe,john@example.com,9876543211,"teaching,coding","education,technology",weekends,False,,active,2023-02-15,1995-07-22
+vol002,jane_smith,c6ba91b90d922e159893f46c387e5dc1b3dc5c101a5a4522f03b987177a24a91,volunteer,Jane Smith,jane@example.com,9876543212,"design,social media","creative,social media",evenings,True,,active,2023-03-20,1992-11-30
