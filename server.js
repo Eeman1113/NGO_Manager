@@ -41,7 +41,7 @@ const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'ngo_management',
-  password: 'pravinyaclass',
+  password: 'YOUR_PASSWORD_HERE',
   port: 5432,
 });
 
