@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,46 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js?v=4"></script>
     <style>
+        /* Critical modal styles - these will override any other styles */
+        .modal-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 9999 !important;
+            display: none;
+        }
+        
+        .modal-overlay[style*="display: flex"],
+        .modal-overlay.visible {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+        
+        .modal-container {
+            background-color: white !important;
+            border-radius: 8px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+            width: 90% !important;
+            max-width: 700px !important;
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+        }
+        
+        .modal-header, 
+        .modal-footer {
+            background-color: #f8f9fa !important;
+            padding: 15px 20px !important;
+        }
+        
+        .modal-body {
+            background-color: white !important;
+            padding: 20px !important;
+        }
+        
         /* Force visibility styles for navbar */
         #sidebar {
             width: 250px !important;
@@ -666,24 +706,37 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
+            display: flex;
             align-items: center;
-            z-index: 1000 !important;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal-container {
             background-color: white;
-            border-radius: 5px;
-            max-width: 90%;
-            width: 600px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
         }
 
         .modal-header {
@@ -947,39 +1000,6 @@
             border-radius: 4px;
             border: 1px solid #ddd;
         }
-
-        /* Admin-only UI elements are hidden by default */
-        .admin-only {
-            display: none !important;
-        }
-
-        /* When user is admin, we show admin-only elements */
-        body.role-admin .admin-only {
-            display: block !important;
-        }
-
-        /* For nav items */
-        body.role-admin .admin-only.nav-item {
-            display: list-item !important;
-        }
-
-        /* For flex elements */
-        body.role-admin .admin-only.d-flex {
-            display: flex !important;
-        }
-
-        /* Debug visibility indicator */
-        #roleDebug {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-            z-index: 9999;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body>
@@ -1215,13 +1235,53 @@
                     <button class="btn btn-primary btn-sm" id="viewAllEvents">View All</button>
                 </div>
                 <div class="card-body">
-                    <div class="events-list" id="dashboardEventsList">
-                        <!-- Events will be loaded dynamically from API -->
-                        <div class="text-center my-3">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
+                    <div class="events-list">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="event-card-content">
+                                    <div class="event-date">
+                                        <div class="month">Dec</div>
+                                        <div class="day">15</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">Annual Charity Run</h4>
+                                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Central Park Stadium</p>
+                                        <p class="event-description">Join us for our annual charity run to raise funds for children's education. Volunteers needed for logistics, registration, and support.</p>
+                                        <div class="domain-badges">
+                                            <span class="badge badge-primary">On Ground</span>
+                                            <span class="badge badge-secondary">Marketing</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <p>Loading upcoming events...</p>
+                            <div class="card-footer d-flex justify-content-between">
+                                <div><strong>Volunteers:</strong> 24/40</div>
+                                <button class="btn btn-primary btn-sm">Sign Up</button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="event-card-content">
+                                    <div class="event-date">
+                                        <div class="month">Dec</div>
+                                        <div class="day">22</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">Food Distribution Drive</h4>
+                                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Community Center</p>
+                                        <p class="event-description">Holiday season food distribution drive for underprivileged families. Help us package and distribute meals.</p>
+                                        <div class="domain-badges">
+                                            <span class="badge badge-primary">On Ground</span>
+                                            <span class="badge badge-success">Social Work</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <div><strong>Volunteers:</strong> 18/30</div>
+                                <button class="btn btn-primary btn-sm">Sign Up</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1319,7 +1379,7 @@
         <section id="eventsSection" class="section">
             <div class="section-header">
                 <h1 class="section-title">Events Management</h1>
-                <button class="btn btn-primary" id="createEventBtn" onclick="openCreateEventModal()"><i class="fas fa-plus"></i> Create Event</button>
+                <button class="btn btn-primary" id="directEventButton" onclick="showEventModal()"><i class="fas fa-plus"></i> Create Event</button>
             </div>
 
             <div class="tab-nav">
@@ -1431,175 +1491,164 @@
 
         <!-- Members Section -->
         <section id="membersSection" class="section">
-            <div id="unauthorizedMessage" style="display: none;" class="text-center mt-5">
-                <div class="alert alert-warning" style="max-width: 600px; margin: 100px auto;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; display: block; margin-bottom: 20px;"></i>
-                    <h3>Access Restricted</h3>
-                    <p>You do not have permission to view this section. Only administrators can access member and volunteer data.</p>
-                    <p class="mt-3">If you believe you should have access, please contact the admin team.</p>
+            <div class="section-header">
+                <h1 class="section-title">Members & Volunteers</h1>
+                <div>
+                    <input type="text" class="form-control" placeholder="Search members..." id="memberSearch" style="width: 250px;">
                 </div>
             </div>
-            
-            <div id="membersContent">
-                <div class="section-header">
-                    <h1 class="section-title">Members & Volunteers</h1>
-                    <div>
-                        <input type="text" class="form-control" placeholder="Search members..." id="memberSearch" style="width: 250px;">
-                    </div>
-                </div>
 
-                <div class="tab-nav">
-                    <div class="tab-link active" data-tab="allMembersTab">All Members</div>
-                    <div class="tab-link" data-tab="activeMembersTab">Active</div>
-                    <div class="tab-link" data-tab="inactiveMembersTab">Inactive</div>
-                    <div class="tab-link" data-tab="pendingVerificationTab">Pending Verification</div>
-                </div>
+            <div class="tab-nav">
+                <div class="tab-link active" data-tab="allMembersTab">All Members</div>
+                <div class="tab-link" data-tab="activeMembersTab">Active</div>
+                <div class="tab-link" data-tab="inactiveMembersTab">Inactive</div>
+                <div class="tab-link" data-tab="pendingVerificationTab">Pending Verification</div>
+            </div>
 
-                <div id="allMembersTab" class="tab-content active">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Domains</th>
-                                    <th>Joined</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Priya Sharma</td>
-                                    <td>priya@example.com</td>
-                                    <td>Volunteer</td>
-                                    <td>
-                                        <div class="domain-badges">
-                                            <span class="badge badge-primary">Marketing</span>
-                                            <span class="badge badge-secondary">Social Media</span>
-                                        </div>
-                                    </td>
-                                    <td>Mar 12, 2025</td>
-                                    <td><span class="badge badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Rahul Desai</td>
-                                    <td>rahul@example.com</td>
-                                    <td>Member</td>
-                                    <td>
-                                        <div class="domain-badges">
-                                            <span class="badge badge-info">Technical</span>
-                                        </div>
-                                    </td>
-                                    <td>Jun 5, 2025</td>
-                                    <td><span class="badge badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Aisha Khan</td>
-                                    <td>aisha@example.com</td>
-                                    <td>Admin</td>
-                                    <td>
-                                        <div class="domain-badges">
-                                            <span class="badge badge-primary">Marketing</span>
-                                            <span class="badge badge-warning">Event Planning</span>
-                                        </div>
-                                    </td>
-                                    <td>Jan 20, 2022</td>
-                                    <td><span class="badge badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Vikram Patel</td>
-                                    <td>vikram@example.com</td>
-                                    <td>Volunteer</td>
-                                    <td>
-                                        <div class="domain-badges">
-                                            <span class="badge badge-success">On Ground</span>
-                                        </div>
-                                    </td>
-                                    <td>Aug 17, 2025</td>
-                                    <td><span class="badge badge-danger">Inactive</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="activeMembersTab" class="tab-content">
-                    <!-- Will be populated with active members -->
-                </div>
-
-                <div id="inactiveMembersTab" class="tab-content">
-                    <!-- Will be populated with inactive members -->
-                </div>
-
-                <div id="pendingVerificationTab" class="tab-content">
-                    <div class="card verification-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Pending Aadhaar Verification</h3>
-                        </div>
-                        <div class="card-body">
-                            <!-- Verification Card 1 -->
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="verification-details">
-                                        <div class="verification-info">
-                                            <h4>Sandeep Kumar</h4>
-                                            <p><strong>Email:</strong> sandeep@example.com</p>
-                                            <p><strong>Phone:</strong> +91 98765 43210</p>
-                                            <p><strong>Aadhaar Number:</strong> xxxx xxxx 5678</p>
-                                            <p><strong>Registration Date:</strong> Dec 1, 2025</p>
-                                        </div>
-                                        <div class="verification-image">
-                                            <img src="https://placehold.co/400x250?text=Aadhaar+Card" alt="Aadhaar Card">
-                                        </div>
+            <div id="allMembersTab" class="tab-content active">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Domains</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Priya Sharma</td>
+                                <td>priya@example.com</td>
+                                <td>Volunteer</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-primary">Marketing</span>
+                                        <span class="badge badge-secondary">Social Media</span>
                                     </div>
-                                </div>
-                                <div class="card-footer">
-                                    <div class="d-flex justify-content-between">
-                                        <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
-                                        <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                </td>
+                                <td>Mar 12, 2025</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rahul Desai</td>
+                                <td>rahul@example.com</td>
+                                <td>Member</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-info">Technical</span>
+                                    </div>
+                                </td>
+                                <td>Jun 5, 2025</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Aisha Khan</td>
+                                <td>aisha@example.com</td>
+                                <td>Admin</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-primary">Marketing</span>
+                                        <span class="badge badge-warning">Event Planning</span>
+                                    </div>
+                                </td>
+                                <td>Jan 20, 2022</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Vikram Patel</td>
+                                <td>vikram@example.com</td>
+                                <td>Volunteer</td>
+                                <td>
+                                    <div class="domain-badges">
+                                        <span class="badge badge-success">On Ground</span>
+                                    </div>
+                                </td>
+                                <td>Aug 17, 2025</td>
+                                <td><span class="badge badge-danger">Inactive</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="activeMembersTab" class="tab-content">
+                <!-- Will be populated with active members -->
+            </div>
+
+            <div id="inactiveMembersTab" class="tab-content">
+                <!-- Will be populated with inactive members -->
+            </div>
+
+            <div id="pendingVerificationTab" class="tab-content">
+                <div class="card verification-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Aadhaar Verification</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Verification Card 1 -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="verification-details">
+                                    <div class="verification-info">
+                                        <h4>Sandeep Kumar</h4>
+                                        <p><strong>Email:</strong> sandeep@example.com</p>
+                                        <p><strong>Phone:</strong> +91 98765 43210</p>
+                                        <p><strong>Aadhaar Number:</strong> xxxx xxxx 5678</p>
+                                        <p><strong>Registration Date:</strong> Dec 1, 2025</p>
+                                    </div>
+                                    <div class="verification-image">
+                                        <img src="https://placehold.co/400x250?text=Aadhaar+Card" alt="Aadhaar Card">
                                     </div>
                                 </div>
                             </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                                    <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                </div>
+                            </div>
+                        </div>
 
-                            <!-- Verification Card 2 -->
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="verification-details">
-                                        <div class="verification-info">
-                                            <h4>Meera Joshi</h4>
-                                            <p><strong>Email:</strong> meera@example.com</p>
-                                            <p><strong>Phone:</strong> +91 98765 12345</p>
-                                            <p><strong>Aadhaar Number:</strong> xxxx xxxx 1234</p>
-                                            <p><strong>Registration Date:</strong> Dec 3, 2025</p>
-                                        </div>
-                                        <div class="verification-image">
-                                            <img src="https://placehold.co/400x250?text=Aadhaar+Card" alt="Aadhaar Card">
-                                        </div>
+                        <!-- Verification Card 2 -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="verification-details">
+                                    <div class="verification-info">
+                                        <h4>Meera Joshi</h4>
+                                        <p><strong>Email:</strong> meera@example.com</p>
+                                        <p><strong>Phone:</strong> +91 98765 12345</p>
+                                        <p><strong>Aadhaar Number:</strong> xxxx xxxx 1234</p>
+                                        <p><strong>Registration Date:</strong> Dec 3, 2025</p>
+                                    </div>
+                                    <div class="verification-image">
+                                        <img src="https://placehold.co/400x250?text=Aadhaar+Card" alt="Aadhaar Card">
                                     </div>
                                 </div>
-                                <div class="card-footer">
-                                    <div class="d-flex justify-content-between">
-                                        <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
-                                        <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
-                                    </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                                    <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
                                 </div>
                             </div>
                         </div>
@@ -1729,7 +1778,7 @@
         <section id="ideationSection" class="section">
             <div class="section-header">
                 <h1 class="section-title">Ideas & Problem Reporting</h1>
-                <button class="btn btn-primary" id="submitIdeaBtn" onclick="document.getElementById('submitIdeaModal').style.display='flex';"><i class="fas fa-lightbulb"></i> Submit New Idea</button>
+                <button class="btn btn-primary" id="submitIdeaBtn"><i class="fas fa-lightbulb"></i> Submit New Idea</button>
             </div>
 
             <div class="tab-nav">
@@ -1739,12 +1788,7 @@
             </div>
 
             <div id="ideasTab" class="tab-content active">
-                <!-- Ideas will be dynamically loaded here -->
-                <div class="ideas-container">
-                    <!-- Dynamic content will be inserted here by JavaScript -->
-                </div>
-                
-                <!-- Example static idea card - will be replaced by dynamic content -->
+                <!-- Idea Card 1 -->
                 <div class="card mb-3">
                     <div class="card-header">
                         <h3 class="card-title">Virtual Fundraising Event</h3>
@@ -1765,22 +1809,55 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Idea Card 2 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Skills Workshop</h3>
+                        <span class="badge badge-primary">Event Idea</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Submitted by:</strong> Aisha Khan</p>
+                        <p><strong>Date:</strong> Nov 20, 2025</p>
+                        <p class="mt-2">We should conduct monthly workshops where our skilled volunteers can teach various skills to underprivileged children. Skills can include basic computer usage, art, language, etc. This would be a sustainable model for continuous engagement.</p>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-secondary"><i class="fas fa-thumbs-up"></i> Upvote (23)</button>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-comment"></i> Comment (8)</button>
+                            </div>
+                            <div>
+                                <span class="badge badge-success">Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="problemsTab" class="tab-content">
-                <!-- Problems will be dynamically loaded here -->
-                <div class="problems-container">
-                    <!-- Dynamic content will be inserted here by JavaScript -->
+                <!-- Problem Card 1 -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Transportation Issues for On-Ground Events</h3>
+                        <span class="badge badge-danger">Logistical Problem</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Submitted by:</strong> Priya Sharma</p>
+                        <p><strong>Date:</strong> Dec 2, 2025</p>
+                        <p class="mt-2">Many volunteers face difficulties with transportation to remote event locations. We should consider organizing carpooling or arranging transportation for volunteers to ensure better participation in on-ground events.</p>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-comment"></i> Comment (3)</button>
+                            </div>
+                            <div>
+                                <span class="badge badge-warning">Under Investigation</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="mySubmissionsTab" class="tab-content">
-                <!-- My Submissions will be dynamically loaded here -->
-                <div class="my-submissions-container">
-                    <!-- Dynamic content will be inserted here by JavaScript -->
-                </div>
-                
-                <!-- Default message while no submissions are available -->
+                <!-- Will be populated with user's submissions -->
                 <div class="alert alert-info text-center">
                     Your submitted ideas and problems will appear here.
                 </div>
@@ -1961,7 +2038,7 @@
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="modal-title">Create New Event</h3>
-                <button class="modal-close" onclick="document.getElementById('createEventModal').style.display='none';"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="document.getElementById('createEventModal').style.display='none'; console.log('Close button clicked')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="createEventForm">
@@ -2035,7 +2112,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-light modal-close" onclick="document.getElementById('createEventModal').style.display='none';">Cancel</button>
+                <button class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('createEventModal').style.display = 'none';">Close</button>
                 <button class="btn btn-primary" id="saveEventBtn" onclick="saveEvent()">Create Event</button>
             </div>
         </div>
@@ -2046,7 +2123,7 @@
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="modal-title">Submit New Idea</h3>
-                <button class="modal-close" onclick="document.getElementById('submitIdeaModal').style.display='none';"><i class="fas fa-times"></i></button>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="submitIdeaForm">
@@ -2071,8 +2148,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-light modal-close" onclick="document.getElementById('submitIdeaModal').style.display='none';">Cancel</button>
-                <button class="btn btn-primary" id="saveIdeaBtn" onclick="submitIdea()">Submit Idea</button>
+                <button class="btn btn-light modal-close">Cancel</button>
+                <button class="btn btn-primary" id="saveIdeaBtn">Submit Idea</button>
             </div>
         </div>
     </div>
@@ -2091,108 +2168,6 @@
                 document.querySelector('.main-content').style.marginLeft = show ? '250px' : '0';
             }
         }
-        
-        // Add direct ideas loading function
-        function loadIdeasDirect() {
-            console.log('Loading ideas directly from inline handler');
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            
-            fetch('/api/ideas', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(res => res.json())
-            .then(ideas => {
-                console.log('Ideas loaded:', ideas);
-                
-                // Display ideas
-                const ideasContainer = document.querySelector('#ideationSection .ideas-container');
-                if (!ideasContainer) {
-                    console.error('Ideas container not found!');
-                    return;
-                }
-                
-                ideasContainer.innerHTML = '';
-                
-                if (!ideas || ideas.length === 0) {
-                    ideasContainer.innerHTML = '<div class="alert alert-info">No ideas found</div>';
-                    return;
-                }
-                
-                ideas.forEach(idea => {
-                    const statusClass = idea.status === 'approved' ? 'success' : 
-                                      idea.status === 'rejected' ? 'danger' : 'info';
-                    const statusText = idea.status ? idea.status.charAt(0).toUpperCase() + idea.status.slice(1) : 'Pending';
-                    
-                    const ideaEl = document.createElement('div');
-                    ideaEl.className = 'card idea-card mb-3';
-                    ideaEl.innerHTML = `
-                        <div class="card-header">
-                            <h3 class="card-title">${idea.title}</h3>
-                            <span class="badge badge-primary">${idea.type || 'General'}</span>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Submitted by:</strong> ${idea.submitter_name || 'Anonymous'}</p>
-                            <p><strong>Date:</strong> ${new Date(idea.created_at).toLocaleDateString()}</p>
-                            <p class="mt-2">${idea.description}</p>
-                            <div class="mt-3 d-flex justify-content-between">
-                                <div>
-                                    <button class="btn btn-sm btn-secondary upvote-btn" data-idea-id="${idea.id}">
-                                        <i class="fas fa-thumbs-up"></i> Upvote (${idea.upvotes || 0})
-                                    </button>
-                                    <button class="btn btn-sm btn-light">
-                                        <i class="fas fa-comment"></i> Comment (${idea.comments_count || 0})
-                                    </button>
-                                </div>
-                                <div>
-                                    <span class="badge badge-${statusClass}">${statusText}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    ideasContainer.appendChild(ideaEl);
-                });
-                
-                // Add upvote functionality
-                document.querySelectorAll('.upvote-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const ideaId = this.getAttribute('data-idea-id');
-                        
-                        fetch(`/api/ideas/${ideaId}/upvote`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            alert('Idea upvoted successfully!');
-                            loadIdeasDirect(); // Reload ideas
-                        })
-                        .catch(err => {
-                            console.error('Error upvoting idea:', err);
-                            alert('Error upvoting idea');
-                        });
-                    });
-                });
-            })
-            .catch(err => {
-                console.error('Error loading ideas data:', err);
-                const ideasContainer = document.querySelector('#ideationSection .ideas-container');
-                if (ideasContainer) {
-                    ideasContainer.innerHTML = '<div class="alert alert-danger">Error loading ideas. Please try again later.</div>';
-                }
-            });
-        }
-
-        // Load ideas when page loads
-        loadIdeasDirect();
-        
-        // Also load problems for the Problems tab
-        loadProblems();
         
         // Function to open Create Event Modal
         window.openCreateEventModal = function() {
@@ -2252,7 +2227,7 @@
                 console.log('Already submitting event, preventing duplicate submission');
                 return;
             }
-
+            
             // Get the button for UI updates
             const saveBtn = document.getElementById('saveEventBtn');
             if (saveBtn) {
@@ -2293,12 +2268,12 @@
             const eventData = {
                 title,
                 description,
-                event_date: date,  // Changed back to event_date as expected by API
-                event_time: time,  // Changed back to event_time as expected by API
+                event_date: date,
+                event_time: time,
                 location,
-                event_type: type,  // Changed to event_type as expected by API
-                capacity: parseInt(capacity),  // Convert to number
-                domains: domains.length > 0 ? domains : ["general"]  // Ensure we have at least "general" if no domains selected
+                type,
+                volunteer_capacity: capacity,
+                domains
             };
             
             console.log('Event data to save:', eventData);
@@ -2379,58 +2354,9 @@
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! Status: ${res.status}`);
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(userData => {
                 console.log('User data loaded:', userData);
-                
-                // Find Members tab and section
-                const membersNavItem = document.querySelector('li.nav-item.admin-only');
-                const membersSection = document.getElementById('membersSection');
-                const unauthorizedMessage = document.getElementById('unauthorizedMessage');
-                const membersContent = document.getElementById('membersContent');
-                
-                if (userData.role === 'admin') {
-                    // Show members tab for admin
-                    if (membersNavItem) {
-                        membersNavItem.style.display = 'list-item';
-                    }
-                    
-                    // Show members content for admin
-                    if (membersSection) {
-                        if (unauthorizedMessage) unauthorizedMessage.style.display = 'none';
-                        if (membersContent) membersContent.style.display = 'block';
-                        
-                        // Load actual member data from database
-                        loadMembersData();
-                    }
-                } else {
-                    // Hide members tab for non-admin
-                    if (membersNavItem) {
-                        membersNavItem.style.display = 'none';
-                    }
-                    
-                    // Show unauthorized message for non-admin
-                    if (membersSection) {
-                        if (unauthorizedMessage) unauthorizedMessage.style.display = 'block';
-                        if (membersContent) membersContent.style.display = 'none';
-                    }
-                    
-                    // Add click handler to all section links to check for Members section
-                    document.querySelectorAll('a.nav-link[data-section]').forEach(link => {
-                        link.addEventListener('click', function(e) {
-                            if (this.getAttribute('data-section') === 'membersSection' && userData.role !== 'admin') {
-                                e.preventDefault();
-                                alert('Access Restricted: Only administrators can view member data.');
-                                return false;
-                            }
-                        });
-                    });
-                }
                 
                 // Show dashboard with sidebar
                 showDashboard();
@@ -2440,9 +2366,6 @@
                 if (userNameEl && userData.name) {
                     userNameEl.textContent = userData.name;
                 }
-                
-                // Populate settings form with user data
-                populateSettingsForm(userData);
             })
             .catch(err => {
                 console.error('Error fetching user data:', err);
@@ -2501,8 +2424,8 @@
                 .catch(err => {
                     console.error('Login error:', err);
                     alert('Login error');
+                });
             });
-        });
         }
         
         // Get register button
@@ -2614,9 +2537,6 @@
                 toggleSidebar(false);
             });
         }
-
-        // Call the tab setup function
-        setupIdeationTabs();
     });
     </script>
 
@@ -2689,16 +2609,123 @@
         </div>
     </div>
 
+    <!-- Direct script for event handling - last resort approach -->
     <script>
-    function openCreateEventModal() {
-        console.log('Opening event modal');
+    // Save Event Function - Direct implementation
+    function saveNewEventInline() {
+        console.log('Save Event function called directly');
         
-        // Show the modal
-        const modal = document.getElementById('createEventModal');
+        try {
+            // Get form data
+            var title = document.getElementById('eventTitle').value;
+            var description = document.getElementById('eventDescription').value;
+            var date = document.getElementById('eventDate').value;
+            var time = document.getElementById('eventTime').value;
+            var location = document.getElementById('eventLocation').value;
+            var type = document.getElementById('eventType').value;
+            var capacity = document.getElementById('volunteerCapacity').value;
+            
+            // Validate required fields
+            if (!title || !description || !date || !time || !location || !type || !capacity) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Get domains
+            var domains = [];
+            var checkboxes = document.querySelectorAll('input[name="eventDomains"]:checked');
+            for (var i = 0; i < checkboxes.length; i++) {
+                domains.push(checkboxes[i].value);
+            }
+            
+            // Disable button to prevent multiple submissions
+            document.getElementById('saveEventBtn').disabled = true;
+            document.getElementById('saveEventBtn').innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+            
+            // Send to server
+            var token = localStorage.getItem('token');
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/events', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            
+            xhr.onload = function() {
+                if (xhr.status === 201 || xhr.status === 200) {
+                    // Success
+                    alert('Event created successfully!');
+                    
+                    // Hide modal
+                    document.getElementById('createEventModal').style.display = 'none';
+                    
+                    // Reload page
+                    window.location.reload();
+                } else {
+                    // Error
+                    console.error('Error creating event:', xhr.responseText);
+                    alert('Error creating event: ' + xhr.statusText);
+                    
+                    // Re-enable button
+                    document.getElementById('saveEventBtn').disabled = false;
+                    document.getElementById('saveEventBtn').textContent = 'Create Event';
+                }
+            };
+            
+            xhr.onerror = function() {
+                alert('Network error occurred');
+                document.getElementById('saveEventBtn').disabled = false;
+                document.getElementById('saveEventBtn').textContent = 'Create Event';
+            };
+            
+            // Send the request
+            xhr.send(JSON.stringify({
+                title: title,
+                description: description,
+                event_date: date,
+                event_time: time,
+                location: location,
+                type: type,
+                volunteer_capacity: capacity,
+                domains: domains
+            }));
+            
+        } catch (error) {
+            console.error('Error in saveNewEventInline:', error);
+            alert('An error occurred: ' + error.message);
+            document.getElementById('saveEventBtn').disabled = false;
+            document.getElementById('saveEventBtn').textContent = 'Create Event';
+        }
+    }
+
+    // Ensure tomorrow's date is set by default for event date
+    document.addEventListener('DOMContentLoaded', function() {
+        var createEventBtn = document.getElementById('createEventBtn');
+        if (createEventBtn) {
+            console.log('Found create event button');
+            createEventBtn.addEventListener('click', function() {
+                // Set default date to tomorrow
+                var tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                var dateField = document.getElementById('eventDate');
+                if (dateField) {
+                    var year = tomorrow.getFullYear();
+                    var month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+                    var day = String(tomorrow.getDate()).padStart(2, '0');
+                    dateField.value = year + '-' + month + '-' + day;
+                }
+            });
+        }
+    });
+    </script>
+
+    <script>
+    function showEventModal() {
+        console.log('Show event modal called');
+        var modal = document.getElementById('createEventModal');
         if (modal) {
             modal.style.display = 'flex';
+            modal.style.opacity = '1';
             
-            // Set default date to tomorrow
+            // Set tomorrow's date
             var tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             var dateInput = document.getElementById('eventDate');
@@ -2711,6 +2738,9 @@
             console.error('Modal not found');
         }
     }
+    </script>
+
+    <script>
 
     function saveEvent() {
         console.log('Save event called');
@@ -2737,64 +2767,34 @@
         // Get selected domains
         var domains = [];
         var checkboxes = document.querySelectorAll('input[name="eventDomains"]:checked');
-        console.log('Found domain checkboxes:', checkboxes.length);
-        
         for (var i = 0; i < checkboxes.length; i++) {
-            console.log('Domain value:', checkboxes[i].value);
             domains.push(checkboxes[i].value);
         }
         
-        // Log all domain checkboxes regardless of selection
-        console.log('All domain checkboxes:');
-        document.querySelectorAll('input[name="eventDomains"]').forEach(function(box) {
-            console.log(' - ' + box.value + ': ' + box.checked);
-        });
-        
-        // Ensure at least one domain is selected
-        if (domains.length === 0) {
-            alert('Please select at least one domain');
-            document.getElementById('saveEventBtn').disabled = false;
-            document.getElementById('saveEventBtn').innerHTML = 'Create Event';
-            return;
-        }
-        
-        // Create event data with the exact field names expected by the API
+        // Create event data
         var eventData = {
             title: title,
             description: description,
-            event_date: date,  // Changed back to event_date as expected by API
-            event_time: time,  // Changed back to event_time as expected by API
+            event_date: date,
+            event_time: time,
             location: location,
-            event_type: type,  // Changed to event_type as expected by API
-            capacity: parseInt(capacity),  // Convert to number
-            domains: domains.length > 0 ? domains : ["general"]  // Ensure we have at least "general" if no domains selected
+            type: type,
+            volunteer_capacity: capacity,
+            domains: domains
         };
         
-        // If domains are expected to be a string rather than array by the API
-        // Uncomment the next line:
-        // eventData.domains = JSON.stringify(eventData.domains);
-        
-        console.log('Sending event data:', eventData);
+        console.log('Event data:', eventData);
         
         // Get token
         var token = localStorage.getItem('token');
-        if (!token) {
-            alert('You need to be logged in to create an event');
-            document.getElementById('saveEventBtn').disabled = false;
-            document.getElementById('saveEventBtn').innerHTML = 'Create Event';
-                return;
-            }
-
-        // Send request using XMLHttpRequest
+        
+        // Send request using XMLHttpRequest (more widely supported than fetch)
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/events', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
         
         xhr.onload = function() {
-            console.log('Response status:', xhr.status);
-            console.log('Response text:', xhr.responseText);
-            
             if (xhr.status === 200 || xhr.status === 201) {
                 // Success
                 alert('Event created successfully!');
@@ -2808,27 +2808,7 @@
             } else {
                 // Error
                 console.error('Error creating event:', xhr.responseText);
-                var errorMsg = 'Error creating event';
-                
-                try {
-                    var response = JSON.parse(xhr.responseText);
-                    console.log('Parsed error response:', response);
-                    
-                    if (response.message) {
-                        errorMsg += ': ' + response.message;
-                    } else if (response.error) {
-                        errorMsg += ': ' + response.error;
-                    } else if (typeof response === 'string') {
-                        errorMsg += ': ' + response;
-                    } else {
-                        errorMsg += ' (Status: ' + xhr.status + ')';
-                    }
-                } catch(e) {
-                    console.log('Error parsing response:', e);
-                    errorMsg += ': ' + xhr.statusText + ' (Status: ' + xhr.status + ')';
-                }
-                
-                alert(errorMsg);
+                alert('Error creating event: ' + xhr.statusText);
                 
                 // Re-enable button
                 document.getElementById('saveEventBtn').disabled = false;
@@ -2844,979 +2824,5 @@
         
         xhr.send(JSON.stringify(eventData));
     }
-
-    // Log a message when the page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, event handlers should be ready');
-        
-        // Add a click listener to createEventBtn
-        const createBtn = document.getElementById('createEventBtn');
-        if (createBtn) {
-            console.log('Found Create Event button, adding extra listener');
-            createBtn.addEventListener('click', function() {
-                console.log('Create Event button clicked via listener');
-                openCreateEventModal();
-            });
-        } else {
-            console.error('Could not find Create Event button');
-        }
-    });
-    </script>
-    
-    <script>
-    // Direct implementation of idea submission
-    function submitIdea() {
-        console.log('Submitting idea via direct handler');
-        
-        // Get form values
-        const title = document.getElementById('ideaTitle').value.trim();
-        const type = document.getElementById('ideaType').value;
-        const description = document.getElementById('ideaDescription').value.trim();
-        
-        // Validation - only check for required fields, no domains check
-        if (!title || !description || !type) {
-            alert('Please fill in all required fields');
-                return;
-            }
-
-        // Disable the save button to prevent multiple submissions
-        const saveBtn = document.getElementById('saveIdeaBtn');
-        if (saveBtn) {
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Submitting...';
-        }
-        
-        // Create idea object - no domains property
-        const ideaData = {
-                title,
-                description,
-            type
-        };
-        
-        console.log('Idea data:', ideaData);
-        
-        // Send request
-        fetch('/api/ideas', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(ideaData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Idea created successfully:', data);
-            
-            // Reset form
-            document.getElementById('submitIdeaForm').reset();
-            
-            // Close modal
-            document.getElementById('submitIdeaModal').style.display = 'none';
-            
-            // Show success message
-            alert('Idea submitted successfully!');
-            
-            // Reload ideas using our direct loader function
-            if (typeof loadIdeasDirect === 'function') {
-                loadIdeasDirect();
-            } else {
-                // Reload page as fallback
-                window.location.reload();
-            }
-            
-            // Also reload my submissions if that tab is active
-            if (document.querySelector('#ideationSection .tab-link[data-tab="mySubmissionsTab"].active') && typeof loadMySubmissions === 'function') {
-                loadMySubmissions();
-            }
-            
-            // Also reload problems tab if this was a problem and that tab is active or if it's a problem type
-            const type = document.getElementById('ideaType').value;
-            if ((type && type.toLowerCase().includes('problem')) || 
-                document.querySelector('#ideationSection .tab-link[data-tab="problemsTab"].active')) {
-                if (typeof loadProblems === 'function') {
-                    loadProblems();
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error submitting idea:', error);
-            alert('Failed to submit idea: ' + error.message);
-        })
-        .finally(() => {
-            // Re-enable the save button
-            if (saveBtn) {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Submit Idea';
-            }
-        });
-    }
-</script>
-
-<script>
-// Add function to setup ideation tabs
-function setupIdeationTabs() {
-    console.log('Setting up ideation tabs');
-    
-    const tabLinks = document.querySelectorAll('#ideationSection .tab-link');
-    
-    if (tabLinks.length === 0) {
-        console.warn('No ideation tab links found');
-        return;
-    }
-    
-    console.log(`Found ${tabLinks.length} ideation tab links`);
-    
-    tabLinks.forEach(tabLink => {
-        tabLink.addEventListener('click', function() {
-            // Get the target tab ID
-            const tabId = this.getAttribute('data-tab');
-            console.log('Ideation tab clicked:', tabId);
-            
-            // Update active class for tab links
-            tabLinks.forEach(link => link.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Update active class for tab content
-            const tabContents = document.querySelectorAll('#ideationSection .tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            const activeTabContent = document.getElementById(tabId);
-            if (activeTabContent) {
-                activeTabContent.classList.add('active');
-                
-                // Load data for specific tabs
-                if (tabId === 'problemsTab') {
-                    console.log('Loading problems data...');
-                    loadProblems();
-                } else if (tabId === 'mySubmissionsTab') {
-                    console.log('Loading my submissions data...');
-                    loadMySubmissions();
-                }
-            }
-        });
-    });
-    
-    console.log('Ideation tabs initialized');
-}
-
-// Function to load problems (ideas with problem type)
-function loadProblems() {
-    console.log('Loading problem reports...');
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    
-    fetch('/api/ideas', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(res => res.json())
-    .then(ideas => {
-        console.log('All ideas loaded, filtering for problems:', ideas);
-        
-        // Filter ideas for those that are problems (type includes 'problem')
-        const problems = ideas.filter(idea => 
-            idea.type && (idea.type.toLowerCase() === 'problem' || 
-                          idea.type.toLowerCase().includes('problem') ||
-                          idea.type.toLowerCase() === 'logistical problem'));
-        
-        console.log('Filtered problems:', problems);
-        
-        // Display problems
-        const container = document.querySelector('#problemsTab .problems-container');
-        if (!container) {
-            console.error('Problems container not found!');
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        if (!problems || problems.length === 0) {
-            container.innerHTML = '<div class="alert alert-info text-center">No problem reports found</div>';
-            return;
-        }
-        
-        problems.forEach(problem => {
-            const statusClass = problem.status === 'approved' ? 'success' : 
-                             problem.status === 'rejected' ? 'danger' : 
-                             problem.status === 'investigating' ? 'warning' : 'info';
-            const statusText = problem.status ? problem.status.charAt(0).toUpperCase() + problem.status.slice(1) : 'Pending';
-            
-            const problemEl = document.createElement('div');
-            problemEl.className = 'card problem-card mb-3';
-            problemEl.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">${problem.title}</h3>
-                    <span class="badge badge-danger">${problem.type || 'Problem Report'}</span>
-                </div>
-                <div class="card-body">
-                    <p><strong>Submitted by:</strong> ${problem.submitter_name || 'Anonymous'}</p>
-                    <p><strong>Date:</strong> ${new Date(problem.created_at).toLocaleDateString()}</p>
-                    <p class="mt-2">${problem.description}</p>
-                    <div class="mt-3 d-flex justify-content-between">
-                        <div>
-                            <button class="btn btn-sm btn-light view-comments" data-idea-id="${problem.id}">
-                                <i class="fas fa-comment"></i> Comment (${problem.comments_count || 0})
-                            </button>
-                        </div>
-                        <div>
-                            <span class="badge badge-${statusClass}">${statusText}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(problemEl);
-        });
-    })
-    .catch(err => {
-        console.error('Error loading problems data:', err);
-        const container = document.querySelector('#problemsTab .problems-container');
-        if (container) {
-            container.innerHTML = '<div class="alert alert-danger">Error loading problems. Please try again later.</div>';
-        }
-    });
-}
-
-// Function to load user's submitted ideas
-function loadMySubmissions() {
-    console.log('Loading user submissions...');
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    
-    fetch('/api/ideas/my-submissions', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(res => res.json())
-    .then(ideas => {
-        console.log('User submissions loaded:', ideas);
-        
-        // Display submissions
-        const container = document.querySelector('#mySubmissionsTab .my-submissions-container');
-        if (!container) {
-            console.error('My submissions container not found!');
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        if (!ideas || ideas.length === 0) {
-            document.querySelector('#mySubmissionsTab .alert').style.display = 'block';
-            return;
-        }
-        
-        // Hide the default message
-        document.querySelector('#mySubmissionsTab .alert').style.display = 'none';
-        
-        ideas.forEach(idea => {
-            const statusClass = idea.status === 'approved' ? 'success' : 
-                              idea.status === 'rejected' ? 'danger' : 'info';
-            const statusText = idea.status ? idea.status.charAt(0).toUpperCase() + idea.status.slice(1) : 'Pending';
-            
-            const ideaEl = document.createElement('div');
-            ideaEl.className = 'card idea-card mb-3';
-            ideaEl.innerHTML = `
-                <div class="card-header">
-                    <h3 class="card-title">${idea.title}</h3>
-                    <span class="badge badge-primary">${idea.type || 'General'}</span>
-                </div>
-                <div class="card-body">
-                    <p><strong>Date:</strong> ${new Date(idea.created_at).toLocaleDateString()}</p>
-                    <p class="mt-2">${idea.description}</p>
-                    <div class="mt-3 d-flex justify-content-between">
-                        <div>
-                            <span class="badge badge-secondary"><i class="fas fa-thumbs-up"></i> ${idea.upvotes || 0} Upvotes</span>
-                            <span class="badge badge-secondary"><i class="fas fa-comment"></i> ${idea.comments_count || 0} Comments</span>
-                        </div>
-                        <div>
-                            <span class="badge badge-${statusClass}">${statusText}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(ideaEl);
-        });
-    })
-    .catch(err => {
-        console.error('Error loading user submissions:', err);
-        const container = document.querySelector('#mySubmissionsTab .my-submissions-container');
-        if (container) {
-            container.innerHTML = '<div class="alert alert-danger">Error loading your submissions. Please try again later.</div>';
-        }
-    });
-}
-
-// The initialization is now done in the main DOMContentLoaded handler
-    </script>
-
-    <script>
-    // Function to populate settings form with user data
-    function populateSettingsForm(userData) {
-        // Get settings form elements
-        const settingsEmail = document.getElementById('settingsEmail');
-        const settingsPhone = document.getElementById('settingsPhone');
-        
-        // Set values from userData
-        if (settingsEmail && userData.email) {
-            settingsEmail.value = userData.email;
-        }
-        
-        if (settingsPhone && userData.phone) {
-            settingsPhone.value = userData.phone || '';
-        }
-        
-        // Add submit handler for settings form
-        const settingsForm = document.getElementById('settingsForm');
-        if (settingsForm) {
-            settingsForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Get form values
-                const email = settingsEmail.value;
-                const phone = settingsPhone.value;
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                // Validate current password
-                if (!currentPassword) {
-                    alert('Please enter your current password to make changes');
-                    return;
-                }
-                
-                // Validate new password match if provided
-                if (newPassword && newPassword !== confirmPassword) {
-                    alert('New passwords do not match');
-                    return;
-                }
-                
-                // Prepare data to update
-                const updateData = {
-                    email: email,
-                    phone: phone,
-                    current_password: currentPassword
-                };
-                
-                // Add new password if provided
-                if (newPassword) {
-                    updateData.new_password = newPassword;
-                }
-                
-                // Send update request to server
-                fetch('/api/users/update-profile', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(updateData)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Profile updated successfully');
-                        // Clear password fields
-                        document.getElementById('currentPassword').value = '';
-                        document.getElementById('newPassword').value = '';
-                        document.getElementById('confirmPassword').value = '';
-                    } else {
-                        alert(data.message || 'Failed to update profile');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error updating profile:', err);
-                    alert('Error updating profile. Please try again.');
-                });
-            });
-        }
-        
-        // Handle notification preferences form
-        const savePreferencesBtn = document.querySelector('#settingsSection .card:nth-child(2) .btn-primary');
-        if (savePreferencesBtn) {
-            savePreferencesBtn.addEventListener('click', function() {
-                // Get notification preferences
-                const emailTaskNotifications = document.getElementById('emailTaskNotifications').checked;
-                const emailEventNotifications = document.getElementById('emailEventNotifications').checked;
-                const emailNewsletters = document.getElementById('emailNewsletters').checked;
-                const smsTaskReminders = document.getElementById('smsTaskReminders').checked;
-                const smsEventReminders = document.getElementById('smsEventReminders').checked;
-                
-                // Prepare data for the API endpoint
-                const notificationPrefs = {
-                    email_notifications: emailTaskNotifications || emailEventNotifications || emailNewsletters,
-                    sms_notifications: smsTaskReminders || smsEventReminders,
-                    event_reminders: emailEventNotifications || smsEventReminders,
-                    task_reminders: emailTaskNotifications || smsTaskReminders
-                };
-                
-                // Show loading state
-                const originalText = savePreferencesBtn.textContent;
-                savePreferencesBtn.textContent = 'Saving...';
-                savePreferencesBtn.disabled = true;
-                
-                // Send update request
-                fetch('/api/users/notification-preferences', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(notificationPrefs)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Notification preferences updated successfully');
-                    } else {
-                        alert(data.message || 'Failed to update notification preferences');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error updating notification preferences:', err);
-                    alert('Error updating notification preferences. Please try again.');
-                })
-                .finally(() => {
-                    // Reset button state
-                    savePreferencesBtn.textContent = originalText;
-                    savePreferencesBtn.disabled = false;
-                });
-            });
-        }
-    }
-    </script>
-
-    <script>
-    // Function to load members data from API
-    function loadMembersData() {
-        // Show loading state in the table
-        const membersTableBody = document.querySelector('#allMembersTab tbody');
-        if (membersTableBody) {
-            membersTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Loading members data...</td></tr>';
-        }
-        
-        // Fetch members and volunteers data from API
-        fetch('/api/users/members-volunteers', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(members => {
-            console.log('Members data loaded:', members);
-            populateMembersTable(members);
-            populateActiveMembersTab(members.filter(m => m.active !== false));
-            populateInactiveMembersTab(members.filter(m => m.active === false));
-        })
-        .catch(err => {
-            console.error('Error fetching members data:', err);
-            if (membersTableBody) {
-                membersTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading members data. Please try again.</td></tr>';
-            }
-        });
-    }
-
-    // Function to populate the members table with actual data
-    function populateMembersTable(members) {
-        const membersTableBody = document.querySelector('#allMembersTab tbody');
-        if (!membersTableBody) return;
-        
-        // Clear existing table content
-        membersTableBody.innerHTML = '';
-        
-        if (members.length === 0) {
-            membersTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No members found</td></tr>';
-            return;
-        }
-        
-        // Add each member to the table
-        members.forEach(member => {
-            const row = document.createElement('tr');
-            
-            // Format date
-            const joinDate = member.join_date ? new Date(member.join_date) : new Date();
-            const formattedDate = joinDate.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            // Format domains
-            const domainBadges = (member.domains || []).map(domain => {
-                const badgeClass = getBadgeClassForDomain(domain);
-                return `<span class="badge ${badgeClass}">${capitalizeFirstLetter(domain.replace('_', ' '))}</span>`;
-            }).join('');
-            
-            // Set status based on active field
-            const status = member.active === false 
-                ? '<span class="badge badge-danger">Inactive</span>' 
-                : '<span class="badge badge-success">Active</span>';
-            
-            row.innerHTML = `
-                <td>${escapeHTML(member.name || '')}</td>
-                <td>${escapeHTML(member.email || '')}</td>
-                <td>${capitalizeFirstLetter(member.role || '')}</td>
-                <td>
-                    <div class="domain-badges">
-                        ${domainBadges}
-                    </div>
-                </td>
-                <td>${formattedDate}</td>
-                <td>${status}</td>
-                <td>
-                    <button class="btn btn-sm btn-info view-member" data-id="${member.id}"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-sm btn-primary edit-member" data-id="${member.id}"><i class="fas fa-edit"></i></button>
-                </td>
-            `;
-            
-            membersTableBody.appendChild(row);
-        });
-        
-        // Add event listeners to view and edit buttons
-        addMemberActionEventListeners();
-    }
-
-    // Function to populate active members tab
-    function populateActiveMembersTab(members) {
-        const activeTabContent = document.getElementById('activeMembersTab');
-        if (!activeTabContent) return;
-        
-        if (members.length === 0) {
-            activeTabContent.innerHTML = '<div class="alert alert-info">No active members found</div>';
-            return;
-        }
-        
-        // Create table for active members
-        let html = `
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Domains</th>
-                            <th>Joined</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        // Add member rows
-        members.forEach(member => {
-            const joinDate = member.join_date ? new Date(member.join_date) : new Date();
-            const formattedDate = joinDate.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            const domainBadges = (member.domains || []).map(domain => {
-                const badgeClass = getBadgeClassForDomain(domain);
-                return `<span class="badge ${badgeClass}">${capitalizeFirstLetter(domain.replace('_', ' '))}</span>`;
-            }).join('');
-            
-            html += `
-                <tr>
-                    <td>${escapeHTML(member.name || '')}</td>
-                    <td>${escapeHTML(member.email || '')}</td>
-                    <td>${capitalizeFirstLetter(member.role || '')}</td>
-                    <td>
-                        <div class="domain-badges">
-                            ${domainBadges}
-                        </div>
-                    </td>
-                    <td>${formattedDate}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info view-member" data-id="${member.id}"><i class="fas fa-eye"></i></button>
-                        <button class="btn btn-sm btn-primary edit-member" data-id="${member.id}"><i class="fas fa-edit"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        activeTabContent.innerHTML = html;
-        addMemberActionEventListeners();
-    }
-
-    // Function to populate inactive members tab
-    function populateInactiveMembersTab(members) {
-        const inactiveTabContent = document.getElementById('inactiveMembersTab');
-        if (!inactiveTabContent) return;
-        
-        if (members.length === 0) {
-            inactiveTabContent.innerHTML = '<div class="alert alert-info">No inactive members found</div>';
-            return;
-        }
-        
-        // Create table for inactive members
-        let html = `
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Domains</th>
-                            <th>Joined</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        // Add member rows
-        members.forEach(member => {
-            const joinDate = member.join_date ? new Date(member.join_date) : new Date();
-            const formattedDate = joinDate.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            
-            const domainBadges = (member.domains || []).map(domain => {
-                const badgeClass = getBadgeClassForDomain(domain);
-                return `<span class="badge ${badgeClass}">${capitalizeFirstLetter(domain.replace('_', ' '))}</span>`;
-            }).join('');
-            
-            html += `
-                <tr>
-                    <td>${escapeHTML(member.name || '')}</td>
-                    <td>${escapeHTML(member.email || '')}</td>
-                    <td>${capitalizeFirstLetter(member.role || '')}</td>
-                    <td>
-                        <div class="domain-badges">
-                            ${domainBadges}
-                        </div>
-                    </td>
-                    <td>${formattedDate}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info view-member" data-id="${member.id}"><i class="fas fa-eye"></i></button>
-                        <button class="btn btn-sm btn-primary edit-member" data-id="${member.id}"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-success activate-member" data-id="${member.id}"><i class="fas fa-check"></i> Activate</button>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        inactiveTabContent.innerHTML = html;
-        addMemberActionEventListeners();
-    }
-
-    // Add event listeners to member action buttons
-    function addMemberActionEventListeners() {
-        // View member buttons
-        document.querySelectorAll('.view-member').forEach(button => {
-            button.addEventListener('click', function() {
-                const memberId = this.getAttribute('data-id');
-                alert(`View member ${memberId} (To be implemented)`);
-                // Future implementation: Show member details modal
-            });
-        });
-        
-        // Edit member buttons
-        document.querySelectorAll('.edit-member').forEach(button => {
-            button.addEventListener('click', function() {
-                const memberId = this.getAttribute('data-id');
-                alert(`Edit member ${memberId} (To be implemented)`);
-                // Future implementation: Show edit member form
-            });
-        });
-        
-        // Activate member buttons
-        document.querySelectorAll('.activate-member').forEach(button => {
-            button.addEventListener('click', function() {
-                const memberId = this.getAttribute('data-id');
-                alert(`Activate member ${memberId} (To be implemented)`);
-                // Future implementation: Send API request to activate member
-            });
-        });
-    }
-
-    // Utility function to escape HTML to prevent XSS
-    function escapeHTML(str) {
-        if (!str) return '';
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    // Utility function to capitalize first letter
-    function capitalizeFirstLetter(string) {
-        if (!string) return '';
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    // Get appropriate badge class based on domain
-    function getBadgeClassForDomain(domain) {
-        const domainClasses = {
-            'marketing': 'badge-primary',
-            'social_media': 'badge-secondary',
-            'technical': 'badge-info',
-            'on_ground': 'badge-success',
-            'event_planning': 'badge-warning',
-            'education': 'badge-danger',
-            'environment': 'badge-dark',
-            'technology': 'badge-info'
-        };
-        
-        return domainClasses[domain.toLowerCase()] || 'badge-secondary';
-    }
-    </script>
-
-    <script>
-    // Function to load dashboard data
-    function loadDashboardData() {
-        // Set current date
-        const currentDateEl = document.getElementById('currentDate');
-        if (currentDateEl) {
-            const now = new Date();
-            currentDateEl.textContent = now.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-        }
-        
-        // Load upcoming events for dashboard
-        loadDashboardEvents();
-    }
-
-    // Function to load upcoming events for the dashboard
-    function loadDashboardEvents() {
-        const container = document.getElementById('dashboardEventsList');
-        if (!container) return;
-        
-        // Show loading state
-        container.innerHTML = `
-            <div class="text-center my-3">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <p>Loading upcoming events...</p>
-            </div>
-        `;
-        
-        // Fetch upcoming events from API
-        fetch('/api/events/upcoming', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(events => {
-            console.log('Loaded dashboard events:', events);
-            
-            if (events.length === 0) {
-                container.innerHTML = '<div class="alert alert-info text-center">No upcoming events found</div>';
-                return;
-            }
-            
-            // Clear container
-            container.innerHTML = '';
-            
-            // Sort events by date (soonest first)
-            events.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
-            
-            // Show only the first 3 events
-            const displayEvents = events.slice(0, 3);
-            
-            // Add each event to the container
-            displayEvents.forEach(event => {
-                const card = createDashboardEventCard(event);
-                container.appendChild(card);
-            });
-            
-            // Add view all events button event listener
-            const viewAllBtn = document.getElementById('viewAllEvents');
-            if (viewAllBtn) {
-                viewAllBtn.addEventListener('click', function() {
-                    // Navigate to events section
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        if (link.getAttribute('data-section') === 'eventsSection') {
-                            link.click();
-                        }
-                    });
-                });
-            }
-        })
-        .catch(err => {
-            console.error('Error loading dashboard events:', err);
-            container.innerHTML = '<div class="alert alert-danger text-center">Error loading events. Please try again.</div>';
-        });
-    }
-
-    // Function to create dashboard event card
-    function createDashboardEventCard(event) {
-        // Create card element
-        const card = document.createElement('div');
-        card.className = 'card mb-3';
-        card.dataset.eventId = event.id;
-        
-        // Format date
-        const eventDate = new Date(event.event_date);
-        const month = eventDate.toLocaleString('default', { month: 'short' });
-        const day = eventDate.getDate();
-        
-        // Format domains
-        const domainBadges = (event.domains || []).map(domain => {
-            const badgeClass = getBadgeClassForDomain(domain);
-            return `<span class="badge ${badgeClass}">${capitalizeFirstLetter(domain.replace('_', ' '))}</span>`;
-        }).join('');
-        
-        // Calculate capacity and registration status
-        const totalVolunteers = event.participants_count || 0;
-        const capacity = event.capacity || 20;
-        const isRegistered = event.is_registered || false;
-        const isFull = totalVolunteers >= capacity;
-        
-        // Sign up button state
-        let signUpButton;
-        if (isRegistered) {
-            signUpButton = `<button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Registered</button>`;
-        } else if (isFull) {
-            signUpButton = `<button class="btn btn-secondary btn-sm" disabled><i class="fas fa-users-slash"></i> Full</button>`;
-        } else {
-            signUpButton = `<button class="btn btn-primary btn-sm dashboard-signup-btn">Sign Up</button>`;
-        }
-        
-        // Build the card HTML
-        card.innerHTML = `
-            <div class="card-body">
-                <div class="event-card-content">
-                    <div class="event-date">
-                        <div class="month">${month}</div>
-                        <div class="day">${day}</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">${escapeHTML(event.title)}</h4>
-                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(event.location)}</p>
-                        <p class="event-description">${escapeHTML(truncateText(event.description, 120))}</p>
-                        <div class="domain-badges">
-                            ${domainBadges}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer d-flex justify-content-between">
-                <div><strong>Volunteers:</strong> ${totalVolunteers}/${capacity}</div>
-                ${signUpButton}
-            </div>
-        `;
-        
-        // Add event listener for signup button
-        const signupBtn = card.querySelector('.dashboard-signup-btn');
-        if (signupBtn) {
-            signupBtn.addEventListener('click', function() {
-                registerForEventFromDashboard(event.id);
-            });
-        }
-        
-        return card;
-    }
-
-    // Function to register for an event from dashboard
-    function registerForEventFromDashboard(eventId) {
-        if (confirm('Are you sure you want to register for this event?')) {
-            const button = document.querySelector(`.card[data-event-id="${eventId}"] .dashboard-signup-btn`);
-            
-            // Show loading state
-            if (button) {
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
-            }
-            
-            fetch('/api/events/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ event_id: eventId })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! Status: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                alert('Successfully registered for the event!');
-                // Reload dashboard events to update UI
-                loadDashboardEvents();
-            })
-            .catch(err => {
-                console.error('Error registering for event:', err);
-                alert('Error registering for event. Please try again.');
-                
-                // Reset button state
-                if (button) {
-                    button.disabled = false;
-                    button.innerHTML = 'Sign Up';
-                }
-            });
-        }
-    }
-
-    // Helper function to truncate text
-    function truncateText(text, maxLength) {
-        if (!text) return '';
-        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-    }
-
-    // Call loadDashboardData when showing dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add event listener to dashboard tab click
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.getAttribute('data-section') === 'dashboardSection') {
-                link.addEventListener('click', function() {
-                    loadDashboardData();
-                });
-            }
-        });
-        
-        // Also load dashboard data on initial page load if needed
-        if (document.getElementById('dashboardSection').classList.contains('active')) {
-            loadDashboardData();
-        }
-    });
-    </script>
-
 </body>
 </html>
