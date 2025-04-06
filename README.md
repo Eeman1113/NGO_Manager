@@ -41,7 +41,7 @@ A comprehensive web application for managing NGO volunteers, events, tasks, and 
      user: 'postgres',         // Replace with your PostgreSQL username
      host: 'localhost',        // Replace with your PostgreSQL host
      database: 'ngo_management', // Replace with your database name
-     password: 'pravinyaclass',  // Replace with your PostgreSQL password
+     password: 'YOUR_PASSWORD_HERE',  // Replace with your PostgreSQL password
      port: 5432,
    });
    ```
